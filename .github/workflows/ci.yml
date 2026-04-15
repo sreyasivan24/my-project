@@ -35,18 +35,25 @@ jobs:
           import smtplib
           from email.mime.text import MIMEText
 
-          sender = "${{ secrets.EMAIL_USER }}"
-          receiver = "${{ secrets.EMAIL_USER }}"
-          password = "${{ secrets.EMAIL_PASS }}"
+          try:
+              sender = "${{ secrets.EMAIL_USER }}"
+              receiver = "${{ secrets.EMAIL_USER }}"
+              password = "${{ secrets.EMAIL_PASS }}"
 
-          msg = MIMEText("Code was pushed to repository successfully")
-          msg['Subject'] = "CI Alert: Code Changed"
-          msg['From'] = sender
-          msg['To'] = receiver
+              msg = MIMEText("Code was pushed to repository successfully")
+              msg['Subject'] = "CI Alert: Code Changed"
+              msg['From'] = sender
+              msg['To'] = receiver
 
-          server = smtplib.SMTP('smtp.gmail.com', 587)
-          server.starttls()
-          server.login(sender, password)
-          server.send_message(msg)
-          server.quit()
+              server = smtplib.SMTP('smtp.gmail.com', 587)
+              server.starttls()
+              server.login(sender, password)
+              server.send_message(msg)
+              server.quit()
+
+              print("Email sent successfully")
+
+          except Exception as e:
+              print("Email failed:", e)
+              exit(0)
           EOF
