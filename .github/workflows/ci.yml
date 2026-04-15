@@ -26,3 +26,25 @@ jobs:
         run: |
           bandit -r .
           if [ $? -ne 0 ]; then exit 1; fi
+      - name: Send Email Notification
+        if: always()
+        run: |
+          python - <<EOF
+          import smtplib
+          from email.mime.text import MIMEText
+
+          sender = "${{ secrets.EMAIL_USER }}"
+          receiver = "${{ secrets.EMAIL_USER }}"
+          password = "${{ secrets.EMAIL_PASS }}"
+
+          msg = MIMEText("Code was pushed to repository successfully")
+          msg['Subject'] = "CI Alert: Code Changed"
+          msg['From'] = sender
+          msg['To'] = receiver
+
+          server = smtplib.SMTP('smtp.gmail.com', 587)
+          server.starttls()
+          server.login(sender, password)
+          server.send_message(msg)
+          server.quit()
+          EOF
