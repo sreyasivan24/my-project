@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2   # IMPORTANT for change detection
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -72,7 +74,7 @@ jobs:
                   else:
                       message_lines.append(f"{file} was CHANGED")
 
-              final_message = "\n".join(message_lines)
+              final_message = "\n".join(message_lines) if message_lines else "No specific file changes detected"
 
               msg = MIMEText(f"Repository Changes:\n\n{final_message}")
               msg['Subject'] = "CI Alert: File Changes"
