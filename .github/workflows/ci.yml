@@ -27,6 +27,12 @@ jobs:
       - name: Run Security Scan
         run: bandit -r . || true
 
+      - name: Get Changes
+        run: |
+          echo "CHANGES<<EOF" >> $GITHUB_ENV
+          git diff --name-status HEAD^ HEAD >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Send Email Notification
         if: always()
         continue-on-error: true
@@ -40,8 +46,10 @@ jobs:
               receiver = "${{ secrets.EMAIL_USER }}"
               password = "${{ secrets.EMAIL_PASS }}"
 
-              msg = MIMEText("Code was pushed to repository successfully")
-              msg['Subject'] = "CI Alert: Code Changed"
+              changes = """${{ env.CHANGES }}"""
+
+              msg = MIMEText(f"Changes detected in repository:\n\n{changes}")
+              msg['Subject'] = "CI Alert: Code Changes"
               msg['From'] = sender
               msg['To'] = receiver
 
