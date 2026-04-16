@@ -8,9 +8,12 @@ def home():
 
     if request.method == "POST":
         city = request.form.get("city")
-        
-        # Simple dummy weather (for now)
-        weather = f"Weather in {city}: Sunny ☀️, 100°C"
+
+        if city:
+            # Better dummy weather (random feel)
+            weather = f"Weather in {city}: 🌤️ 30°C, Clear Sky"
+        else:
+            weather = "Please enter a city name"
 
     return render_template("index.html", weather=weather)
 
