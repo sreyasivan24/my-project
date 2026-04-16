@@ -1,67 +1,51 @@
-name: CI Pipeline
+- name: Send Email Notification
+  if: always()
+  continue-on-error: true
+  run: |
+    python - <<EOF
+    import smtplib
+    from email.mime.text import MIMEText
 
-on:
-  push:
-    branches:
-      - main
+    try:
+        sender = "${{ secrets.EMAIL_USER }}"
+        receiver = "${{ secrets.EMAIL_USER }}"
+        password = "${{ secrets.EMAIL_PASS }}"
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+        raw_changes = """${{ env.CHANGES }}"""
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+        message_lines = []
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+        for line in raw_changes.splitlines():
+            if not line.strip():
+                continue
 
-      - name: Install dependencies
-        run: pip install bandit
+            status, file = line.split("\t", 1)
 
-      - name: Run Python File
-        run: python app.py
+            if status == "M":
+                message_lines.append(f"{file} was MODIFIED")
+            elif status == "A":
+                message_lines.append(f"{file} was ADDED (UPDATED)")
+            elif status == "D":
+                message_lines.append(f"{file} was DELETED")
+            else:
+                message_lines.append(f"{file} was CHANGED")
 
-      - name: Run Security Scan
-        run: bandit -r . || true
+        final_message = "\n".join(message_lines)
 
-      - name: Get Changes
-        run: |
-          echo "CHANGES<<EOF" >> $GITHUB_ENV
-          git diff --name-status HEAD^ HEAD >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+        msg = MIMEText(f"Repository Changes:\n\n{final_message}")
+        msg['Subject'] = "CI Alert: File Changes"
+        msg['From'] = sender
+        msg['To'] = receiver
 
-      - name: Send Email Notification
-        if: always()
-        continue-on-error: true
-        run: |
-          python - <<EOF
-          import smtplib
-          from email.mime.text import MIMEText
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender, password)
+        server.send_message(msg)
+        server.quit()
 
-          try:
-              sender = "${{ secrets.EMAIL_USER }}"
-              receiver = "${{ secrets.EMAIL_USER }}"
-              password = "${{ secrets.EMAIL_PASS }}"
+        print("Email sent successfully")
 
-              changes = """${{ env.CHANGES }}"""
-
-              msg = MIMEText(f"Changes detected in repository:\n\n{changes}")
-              msg['Subject'] = "CI Alert: Code Changes"
-              msg['From'] = sender
-              msg['To'] = receiver
-
-              server = smtplib.SMTP('smtp.gmail.com', 587)
-              server.starttls()
-              server.login(sender, password)
-              server.send_message(msg)
-              server.quit()
-
-              print("Email sent successfully")
-
-          except Exception as e:
-              print("Email failed:", e)
-              exit(0)
-          EOF
+    except Exception as e:
+        print("Email failed:", e)
+        exit(0)
+    EOF
