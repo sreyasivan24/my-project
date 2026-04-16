@@ -1,4 +1,4 @@
 a = 5
 b = 3
-mul = a * b
-print("Multiply is:", mul)
+sum = a + b
+print("Sum is:", sum)
