@@ -1,4 +1,4 @@
 a = 5
 b = 3
-sum = a + b
-print("Sum is:", sum)
+sub = a - b
+print("Sub is:", sub)
