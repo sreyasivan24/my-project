@@ -10,7 +10,7 @@ def home():
         city = request.form.get("city")
         
         # Simple dummy weather (for now)
-        weather = f"Weather in {city}: Sunny ☀️, 50°C"
+        weather = f"Weather in {city}: Sunny ☀️, 100°C"
 
     return render_template("index.html", weather=weather)
 
