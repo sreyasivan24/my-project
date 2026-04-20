@@ -2,19 +2,53 @@
 <html>
 <head>
     <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: #f2f2f2;
+        }
+        .box {
+            margin-top: 100px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 0 10px gray;
+        }
+        input {
+            padding: 10px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 15px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body style="text-align:center; font-family: Arial;">
+<body>
 
-    <h1>🌦️ Weather App</h1>
+<div class="box">
+    <h2>🌦 Weather App</h2>
 
     <form method="POST">
-        <input type="text" name="city" placeholder="Enter city" required>
-        <button type="submit">Get Weather</button>
+        <input type="text" name="city" placeholder="Enter city">
+        <button type="submit">Check</button>
     </form>
 
-    {% if weather %}
-        <h2 style="color: blue;">{{ weather }}</h2>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
     {% endif %}
+
+    {% if weather %}
+        <h3>{{ weather.city }}</h3>
+        <p>{{ weather.status }}</p>
+        <p><b>{{ weather.temp }}</b></p>
+    {% endif %}
+</div>
 
 </body>
 </html>

@@ -1,26 +1,44 @@
 from flask import Flask, render_template, request
 import os
+import random
 
 app = Flask(__name__)
+
+# Dummy weather data
+weather_data = [
+    {"status": "☀️ Sunny", "temp": "32°C"},
+    {"status": "🌧️ Rainy", "temp": "24°C"},
+    {"status": "⛅ Cloudy", "temp": "28°C"},
+    {"status": "🌩️ Stormy", "temp": "22°C"},
+]
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     weather = None
+    error = None
 
     if request.method == "POST":
         city = request.form.get("city")
 
-        # Input validation
-        if city and city.strip():
-            city = city.strip()
-            weather = f"Weather in {city}: 🌤️ 30°C, Clear Sky"
+        # Validation
+        if not city or not city.strip():
+            error = "⚠️ Please enter a valid city name"
+        elif not city.replace(" ", "").isalpha():
+            error = "⚠️ City name should contain only letters"
         else:
-            weather = "⚠️ Please enter a valid city name"
+            city = city.strip().title()
+            selected = random.choice(weather_data)
 
-    return render_template("index.html", weather=weather)
+            weather = {
+                "city": city,
+                "status": selected["status"],
+                "temp": selected["temp"]
+            }
+
+    return render_template("index.html", weather=weather, error=error)
 
 
 if __name__ == "__main__":
-    # Secure debug handling (no hardcoded debug=True)
+    # SAFE: no debug=True hardcoded
     debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug_mode)
