@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-# Dummy weather data for demo
+# Dummy weather data
 weather_data = [
     {"status": "☀️ Sunny", "temp": "32°C"},
     {"status": "🌧️ Rainy", "temp": "24°C"},
@@ -20,15 +20,13 @@ def home():
     if request.method == "POST":
         city = request.form.get("city")
 
-        # Input validation
+        # Validation
         if not city or not city.strip():
             error = "⚠️ Please enter a valid city name"
         elif not city.replace(" ", "").isalpha():
             error = "⚠️ City name should contain only letters"
         else:
             city = city.strip().title()
-
-            # Random weather (demo purpose)
             selected = random.choice(weather_data)
 
             weather = {
@@ -41,5 +39,6 @@ def home():
 
 
 if __name__ == "__main__":
+    # SAFE: no debug=True hardcoded
     debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug_mode)
