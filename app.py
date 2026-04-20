@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-import random
+import os
 
 app = Flask(__name__)
 
@@ -10,19 +10,17 @@ def home():
     if request.method == "POST":
         city = request.form.get("city")
 
+        # Input validation
         if city and city.strip():
-            city = city.strip().title()
-
-            # Random weather simulation
-            temp = random.randint(25, 40)
-            conditions = ["Sunny ☀️", "Cloudy ☁️", "Rainy 🌧️", "Windy 🌬️"]
-            condition = random.choice(conditions)
-
-            weather = f"Weather in {city}: {condition}, {temp}°C"
+            city = city.strip()
+            weather = f"Weather in {city}: 🌤️ 30°C, Clear Sky"
         else:
             weather = "⚠️ Please enter a valid city name"
 
     return render_template("index.html", weather=weather)
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Secure debug handling (no hardcoded debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
+    app.run(debug=debug_mode)
