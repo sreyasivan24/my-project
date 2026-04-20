@@ -30,66 +30,67 @@ jobs:
       - name: Run Security Scan
         run: bandit -r . -ll
 
-      - name: Get File Changes
+      - name: Get Changes
         run: |
-          echo "CHANGES<<EOF" >> $GITHUB_ENV
-          git diff --name-status HEAD^ HEAD >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo "CHANGES<<EOF" >> $GITHUB_ENV
+            git diff --name-status HEAD^ HEAD >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "CHANGES=First commit - no previous changes" >> $GITHUB_ENV
+          fi
 
       - name: Send Email Notification
         if: always()
+        continue-on-error: true
         run: |
-          python3 -c "
-import smtplib
-from email.mime.text import MIMEText
+          python - <<EOF
+          import smtplib
+          from email.mime.text import MIMEText
 
-sender = '${{ secrets.EMAIL_USER }}'
-receiver = '${{ secrets.EMAIL_USER }}'
-password = '${{ secrets.EMAIL_PASS }}'
+          try:
+              sender = "${{ secrets.EMAIL_USER }}"
+              receiver = "${{ secrets.EMAIL_USER }}"
+              password = "${{ secrets.EMAIL_PASS }}"
 
-raw_changes = '''${{ env.CHANGES }}'''
+              raw_changes = """${{ env.CHANGES }}"""
+              message_lines = []
 
-added = []
-modified = []
-deleted = []
+              for line in raw_changes.splitlines():
+                  if not line.strip():
+                      continue
 
-for line in raw_changes.splitlines():
-    parts = line.split()
-    if len(parts) < 2:
-        continue
+                  parts = line.split("\t")
+                  if len(parts) < 2:
+                      continue
 
-    status = parts[0]
-    file = parts[1]
+                  status, file = parts
 
-    if status == 'A':
-        added.append(file)
-    elif status == 'M':
-        modified.append(file)
-    elif status == 'D':
-        deleted.append(file)
+                  if status == "M":
+                      message_lines.append(f"{file} was MODIFIED")
+                  elif status == "A":
+                      message_lines.append(f"{file} was ADDED")
+                  elif status == "D":
+                      message_lines.append(f"{file} was DELETED")
+                  else:
+                      message_lines.append(f"{file} was CHANGED")
 
-message = ''
+              final_message = "\n".join(message_lines) if message_lines else "No specific file changes detected"
 
-if added:
-    message += 'ADDED FILES:\n' + '\n'.join(added) + '\n\n'
-if modified:
-    message += 'MODIFIED FILES:\n' + '\n'.join(modified) + '\n\n'
-if deleted:
-    message += 'DELETED FILES:\n' + '\n'.join(deleted) + '\n\n'
+              msg = MIMEText(f"Repository Changes:\n\n{final_message}")
+              msg['Subject'] = "CI Alert: File Changes"
+              msg['From'] = sender
+              msg['To'] = receiver
 
-if not message:
-    message = 'No file changes detected.'
+              server = smtplib.SMTP('smtp.gmail.com', 587)
+              server.starttls()
+              server.login(sender, password)
+              server.send_message(msg)
+              server.quit()
 
-msg = MIMEText(message)
-msg['Subject'] = 'CI Alert: File Change Report'
-msg['From'] = sender
-msg['To'] = receiver
+              print("Email sent successfully")
 
-server = smtplib.SMTP('smtp.gmail.com', 587)
-server.starttls()
-server.login(sender, password)
-server.send_message(msg)
-server.quit()
-
-print('Email sent successfully')
-"
+          except Exception as e:
+              print("Email failed:", e)
+              exit(0)
+          EOF
