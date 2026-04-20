@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import random
 
 app = Flask(__name__)
 
@@ -10,8 +11,14 @@ def home():
         city = request.form.get("city")
 
         if city and city.strip():
-            # Updated dummy weather
-            weather = f"Weather in {city}: 🌤️ 37°C, Clear Sky"
+            city = city.strip().title()
+
+            # Random weather simulation
+            temp = random.randint(25, 40)
+            conditions = ["Sunny ☀️", "Cloudy ☁️", "Rainy 🌧️", "Windy 🌬️"]
+            condition = random.choice(conditions)
+
+            weather = f"Weather in {city}: {condition}, {temp}°C"
         else:
             weather = "⚠️ Please enter a valid city name"
 
