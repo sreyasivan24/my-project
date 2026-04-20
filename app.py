@@ -40,4 +40,5 @@ def home():
 
 if __name__ == "__main__":
     # SAFE: no debug=True hardcoded
+    debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug_mode)

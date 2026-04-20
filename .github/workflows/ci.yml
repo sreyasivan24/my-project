@@ -30,7 +30,7 @@ jobs:
       - name: Run Security Scan
         run: bandit -r . -ll
 
-      - name: Get Changes (Fixed)
+      - name: Get File Changes
         run: |
           echo "CHANGES<<EOF" >> $GITHUB_ENV
           git diff --name-status HEAD^ HEAD >> $GITHUB_ENV
@@ -39,15 +39,15 @@ jobs:
       - name: Send Email Notification
         if: always()
         run: |
-          python - <<EOF
+          python3 -c "
 import smtplib
 from email.mime.text import MIMEText
 
-sender = "${{ secrets.EMAIL_USER }}"
-receiver = "${{ secrets.EMAIL_USER }}"
-password = "${{ secrets.EMAIL_PASS }}"
+sender = '${{ secrets.EMAIL_USER }}'
+receiver = '${{ secrets.EMAIL_USER }}'
+password = '${{ secrets.EMAIL_PASS }}'
 
-raw_changes = """${{ env.CHANGES }}"""
+raw_changes = '''${{ env.CHANGES }}'''
 
 added = []
 modified = []
@@ -61,27 +61,27 @@ for line in raw_changes.splitlines():
     status = parts[0]
     file = parts[1]
 
-    if status == "A":
+    if status == 'A':
         added.append(file)
-    elif status == "M":
+    elif status == 'M':
         modified.append(file)
-    elif status == "D":
+    elif status == 'D':
         deleted.append(file)
 
-message = ""
+message = ''
 
 if added:
-    message += "ADDED FILES:\n" + "\n".join(added) + "\n\n"
+    message += 'ADDED FILES:\n' + '\n'.join(added) + '\n\n'
 if modified:
-    message += "MODIFIED FILES:\n" + "\n".join(modified) + "\n\n"
+    message += 'MODIFIED FILES:\n' + '\n'.join(modified) + '\n\n'
 if deleted:
-    message += "DELETED FILES:\n" + "\n".join(deleted) + "\n\n"
+    message += 'DELETED FILES:\n' + '\n'.join(deleted) + '\n\n'
 
 if not message:
-    message = "No file changes detected."
+    message = 'No file changes detected.'
 
 msg = MIMEText(message)
-msg['Subject'] = "CI Alert: File Change Report"
+msg['Subject'] = 'CI Alert: File Change Report'
 msg['From'] = sender
 msg['To'] = receiver
 
@@ -91,5 +91,5 @@ server.login(sender, password)
 server.send_message(msg)
 server.quit()
 
-print("Email sent successfully")
-EOF
+print('Email sent successfully')
+"
