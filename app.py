@@ -6,11 +6,10 @@ app = Flask(__name__)
 
 # Dummy weather data
 weather_data = [
-    {"status": "☀️ Sunny", "temp": "20°C"},
-    {"status": "🌧️ Rainy", "temp": "40°C"},
+    {"status": "☀️ Sunny", "temp": "10°C"},
+    {"status": "🌧️ Rainy", "temp": "20°C"},
     {"status": "⛅ Cloudy", "temp": "29°C"},
     {"status": "🌩️ Stormy", "temp": "10°C"},
-]
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -42,4 +41,3 @@ if __name__ == "__main__":
     # SAFE: no debug=True hardcoded
     debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug_mode)
-
