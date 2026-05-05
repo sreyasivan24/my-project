@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-# Dummy weather data (Cloudy removed)
+# Dummy weather data
 weather_data = [
     {"status": "☀️ Sunny", "temp": "20°C"},
     {"status": "🌧️ Rainy", "temp": "40°C"},
