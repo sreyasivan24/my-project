@@ -8,7 +8,6 @@ app = Flask(__name__)
 weather_data = [
     {"status": "☀️ Sunny", "temp": "20°C"},
     {"status": "🌧️ Rainy", "temp": "40°C"},
-    {"status": "⛅ Cloudy", "temp": "29°C"},
     {"status": "🌩️ Stormy", "temp": "10°C"},
 ]
 
@@ -43,4 +42,3 @@ if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug_mode)
 
-#this is a yml files
