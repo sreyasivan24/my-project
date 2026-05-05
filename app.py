@@ -8,7 +8,6 @@ app = Flask(__name__)
 weather_data = [
     {"status": "☀️ Sunny", "temp": "10°C"},
     {"status": "🌧️ Rainy", "temp": "20°C"},
-    {"status": "⛅ Cloudy", "temp": "29°C"},
     {"status": "🌩️ Stormy", "temp": "10°C"},
 
 @app.route("/", methods=["GET", "POST"])
