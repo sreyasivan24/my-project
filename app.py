@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 # Dummy weather data
 weather_data = [
-    {"status": "☀️ Sunny", "temp": "20°C"},
-    {"status": "🌧️ Rainy", "temp": "10°C"},
+    {"status": "☀️ Sunny", "temp": "10°C"},
+    {"status": "🌧️ Rainy", "temp": "20°C"},
     {"status": "🌩️ Stormy", "temp": "20°C"},
-
+]
 @app.route("/", methods=["GET", "POST"])
 def home():
     weather = None
